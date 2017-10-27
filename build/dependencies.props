@@ -1,0 +1,13 @@
+<Project>
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <AspNetCoreVersion>1.0.0</AspNetCoreVersion>
+    <CoreFxVersion>4.3.0</CoreFxVersion>
+    <JetBrainsVersion>11.1.0</JetBrainsVersion>
+    <NetStandardImplicitPackageVersion>1.6.0</NetStandardImplicitPackageVersion>
+    <RuntimeFrameworkVersion>1.0.0</RuntimeFrameworkVersion>
+  </PropertyGroup>
+</Project>
