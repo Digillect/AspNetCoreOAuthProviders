@@ -1,14 +1,18 @@
 using System.Linq;
+using System.Security.Claims;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
+using Digillect.AspNetCore.Authentication.VKontakte;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Authentication;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Newtonsoft.Json.Linq;
 
 namespace OAuthClientSample
 {
@@ -47,6 +51,48 @@ namespace OAuthClientSample
                 AutomaticAuthenticate = true,
                 AutomaticChallenge = true,
                 LoginPath = new PathString("/login")
+            });
+
+            // You must first create an app with VKontakte and add its ID and Secret to your user-secrets.
+            // https://vk.com/apps?act=manage
+            app.UseOAuthAuthentication(new OAuthOptions
+            {
+                AuthenticationScheme = "VKontakte-AccessToken",
+                DisplayName = "VKontakte AccessToken only",
+                ClaimsIssuer = VKontakteDefaults.Issuer,
+                CallbackPath = new PathString("/signin-vkontakte-token"),
+                AuthorizationEndpoint = VKontakteDefaults.AuthorizationEndpoint,
+                TokenEndpoint = VKontakteDefaults.TokenEndpoint,
+                Scope = { "email" },
+                ClientId = Configuration["VKontakte:ClientId"],
+                ClientSecret = Configuration["VKontakte:ClientSecret"],
+                SaveTokens = true,
+                Events = new OAuthEvents
+                {
+                    OnCreatingTicket = context =>
+                    {
+                        var email = context.TokenResponse.Response["email"]?.Value<string>();
+                        if (!string.IsNullOrEmpty(email))
+                        {
+                            context.Identity.AddClaim(new Claim(ClaimTypes.Email, email, ClaimValueTypes.Email, context.Options.ClaimsIssuer));
+                        }
+                        return Task.FromResult(0);
+                    },
+                    OnRemoteFailure = HandleOnRemoteFailure
+                }
+            });
+
+            // You must first create an app with VKontakte and add its ID and Secret to your user-secrets.
+            // https://vk.com/apps?act=manage
+            app.UseVKontakteAuthentication(o =>
+            {
+                o.ClientId = Configuration["VKontakte:ClientId"];
+                o.ClientSecret = Configuration["VKontakte:ClientSecret"];
+                o.SaveTokens = true;
+                o.Events = new OAuthEvents
+                {
+                    OnRemoteFailure = HandleOnRemoteFailure
+                };
             });
 
             // A guard against tricky browsers

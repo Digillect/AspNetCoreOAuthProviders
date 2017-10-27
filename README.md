@@ -8,6 +8,7 @@ Contains the OAuth 2.0 authentication providers for ASP.NET Core.
 
 Provider       | Package name                                        | NuGet
 -------------- |-----------------------------------------------------|-----------------------------
+VKontakte (VK) | `Digillect.AspNetCore.Authentication.VKontakte`     | [![NuGet](https://img.shields.io/nuget/v/Digillect.AspNetCore.Authentication.VKontakte.svg)](https://www.nuget.org/packages/Digillect.AspNetCore.Authentication.VKontakte)
 
 ## Notes
 

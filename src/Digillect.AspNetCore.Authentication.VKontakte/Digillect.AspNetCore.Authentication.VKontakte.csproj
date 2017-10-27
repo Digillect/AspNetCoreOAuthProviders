@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard1.3;net451</TargetFrameworks>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Description>ASP.NET Core security middleware enabling VKontakte authentication.</Description>
+    <Authors>Albert Zakiev, f14shm4n, Andrew Nefedkin</Authors>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <PackageTags>aspnetcore;authentication;oauth;security;vkontakte</PackageTags>
+  </PropertyGroup>
+
+</Project>
