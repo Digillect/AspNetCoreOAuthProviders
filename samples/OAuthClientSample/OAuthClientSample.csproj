@@ -16,6 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\Digillect.AspNetCore.Authentication.Odnoklassniki\Digillect.AspNetCore.Authentication.Odnoklassniki.csproj" />
     <ProjectReference Include="..\..\src\Digillect.AspNetCore.Authentication.VKontakte\Digillect.AspNetCore.Authentication.VKontakte.csproj" />
   </ItemGroup>
 

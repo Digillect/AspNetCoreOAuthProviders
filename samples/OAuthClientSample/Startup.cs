@@ -2,6 +2,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
+using Digillect.AspNetCore.Authentication.Odnoklassniki;
 using Digillect.AspNetCore.Authentication.VKontakte;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -51,6 +52,40 @@ namespace OAuthClientSample
                 AutomaticAuthenticate = true,
                 AutomaticChallenge = true,
                 LoginPath = new PathString("/login")
+            });
+
+            // You must first create an app with Odnoklassniki and add its ID, Key and Secret to your user-secrets.
+            // https://apiok.ru/en/dev/app/create
+            app.UseOAuthAuthentication(new OAuthOptions
+            {
+                AuthenticationScheme = "Odnoklassniki-AccessToken",
+                DisplayName = "Odnoklassniki AccessToken only",
+                ClaimsIssuer = OdnoklassnikiDefaults.Issuer,
+                CallbackPath = new PathString("/signin-odnoklassniki-token"),
+                AuthorizationEndpoint = OdnoklassnikiDefaults.AuthorizationEndpoint,
+                TokenEndpoint = OdnoklassnikiDefaults.TokenEndpoint,
+                //Scope = { "VALUABLE_ACCESS,GET_EMAIL" },
+                ClientId = Configuration["Odnoklassniki:ClientId"],
+                ClientSecret = Configuration["Odnoklassniki:ClientSecret"],
+                SaveTokens = true,
+                Events = new OAuthEvents
+                {
+                    OnRemoteFailure = HandleOnRemoteFailure
+                }
+            });
+
+            // You must first create an app with Odnoklassniki and add its ID, Key and Secret to your user-secrets.
+            // https://apiok.ru/en/dev/app/create
+            app.UseOdnoklassnikiAuthentication(o =>
+            {
+                o.ClientId = Configuration["Odnoklassniki:ClientId"];
+                o.ApplicationKey = Configuration["Odnoklassniki:ApplicationKey"];
+                o.ClientSecret = Configuration["Odnoklassniki:ClientSecret"];
+                o.SaveTokens = true;
+                o.Events = new OAuthEvents
+                {
+                    OnRemoteFailure = HandleOnRemoteFailure
+                };
             });
 
             // You must first create an app with VKontakte and add its ID and Secret to your user-secrets.
