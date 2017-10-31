@@ -9,7 +9,11 @@ namespace OAuthClientSample
         public static void Main(string[] args)
         {
             var host = new WebHostBuilder()
-                .ConfigureLogging(factory => factory.AddConsole())
+                .ConfigureLogging(factory =>
+                {
+                    factory.AddConsole();
+                    factory.AddFilter("Console", level => level >= LogLevel.Information);
+                })
                 .UseKestrel()
                 .UseContentRoot(Directory.GetCurrentDirectory())
                 .UseIISIntegration()

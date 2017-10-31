@@ -1,14 +1,18 @@
 // Copyright (c) Andrew Nefedkin. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
-using Microsoft.AspNetCore.Builder;
+using System.Globalization;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.AspNetCore.Http;
 
 namespace Digillect.AspNetCore.Authentication.Odnoklassniki
 {
     /// <summary>
-    /// Configuration options for <see cref="OdnoklassnikiMiddleware"/>.
+    /// Configuration options for <see cref="OdnoklassnikiHandler"/>.
     /// </summary>
     public class OdnoklassnikiOptions : OAuthOptions
     {
@@ -17,8 +21,6 @@ namespace Digillect.AspNetCore.Authentication.Odnoklassniki
         /// </summary>
         public OdnoklassnikiOptions()
         {
-            AuthenticationScheme = OdnoklassnikiDefaults.AuthenticationScheme;
-            DisplayName = OdnoklassnikiDefaults.DisplayName;
             ClaimsIssuer = OdnoklassnikiDefaults.Issuer;
 
             CallbackPath = new PathString("/signin-odnoklassniki");
@@ -29,6 +31,13 @@ namespace Digillect.AspNetCore.Authentication.Odnoklassniki
 
             Scope.Add("VALUABLE_ACCESS");
             Scope.Add("GET_EMAIL");
+
+            ClaimActions.MapJsonKey(ClaimTypes.NameIdentifier, "uid");
+            ClaimActions.MapJsonKey(ClaimTypes.Name, "name");
+            ClaimActions.MapJsonKey(ClaimTypes.Email, "email", ClaimValueTypes.Email);
+            ClaimActions.MapJsonKey(ClaimTypes.GivenName, "first_name");
+            ClaimActions.MapJsonKey(ClaimTypes.Surname, "last_name");
+            ClaimActions.MapJsonKey("urn:odnoklassniki:link", "pic_1");
         }
 
         /// <summary>
@@ -49,5 +58,18 @@ namespace Digillect.AspNetCore.Authentication.Odnoklassniki
             "last_name",
             "pic_1"
         };
+
+        /// <summary>
+        /// Check that the options are valid.  Should throw an exception if things are not ok.
+        /// </summary>
+        public override void Validate()
+        {
+            base.Validate();
+
+            if (string.IsNullOrEmpty(ApplicationKey))
+            {
+                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.Exception_OptionMustBeProvided, nameof(ApplicationKey)), nameof(ApplicationKey));
+            }
+        }
     }
 }

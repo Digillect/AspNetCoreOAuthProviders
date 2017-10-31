@@ -10,7 +10,6 @@ using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Authentication;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json.Linq;
@@ -40,43 +39,31 @@ namespace OAuthClientSample
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddAuthentication(options => options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme);
-        }
+            var auth = services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme);
 
-        public void Configure(IApplicationBuilder app)
-        {
-            app.UseDeveloperExceptionPage();
-
-            app.UseCookieAuthentication(new CookieAuthenticationOptions
-            {
-                AutomaticAuthenticate = true,
-                AutomaticChallenge = true,
-                LoginPath = new PathString("/login")
-            });
+            auth.AddCookie(o => o.LoginPath = new PathString("/login"));
 
             // You must first create an app with Odnoklassniki and add its ID, Key and Secret to your user-secrets.
             // https://apiok.ru/en/dev/app/create
-            app.UseOAuthAuthentication(new OAuthOptions
+            auth.AddOAuth("Odnoklassniki-AccessToken", "Odnoklassniki AccessToken only", o =>
             {
-                AuthenticationScheme = "Odnoklassniki-AccessToken",
-                DisplayName = "Odnoklassniki AccessToken only",
-                ClaimsIssuer = OdnoklassnikiDefaults.Issuer,
-                CallbackPath = new PathString("/signin-odnoklassniki-token"),
-                AuthorizationEndpoint = OdnoklassnikiDefaults.AuthorizationEndpoint,
-                TokenEndpoint = OdnoklassnikiDefaults.TokenEndpoint,
-                //Scope = { "VALUABLE_ACCESS,GET_EMAIL" },
-                ClientId = Configuration["Odnoklassniki:ClientId"],
-                ClientSecret = Configuration["Odnoklassniki:ClientSecret"],
-                SaveTokens = true,
-                Events = new OAuthEvents
+                o.ClaimsIssuer = OdnoklassnikiDefaults.Issuer;
+                o.CallbackPath = new PathString("/signin-odnoklassniki-token");
+                o.AuthorizationEndpoint = OdnoklassnikiDefaults.AuthorizationEndpoint;
+                o.TokenEndpoint = OdnoklassnikiDefaults.TokenEndpoint;
+                //o.Scope.Add("VALUABLE_ACCESS,GET_EMAIL");
+                o.ClientId = Configuration["Odnoklassniki:ClientId"];
+                o.ClientSecret = Configuration["Odnoklassniki:ClientSecret"];
+                o.SaveTokens = true;
+                o.Events = new OAuthEvents
                 {
                     OnRemoteFailure = HandleOnRemoteFailure
-                }
+                };
             });
 
             // You must first create an app with Odnoklassniki and add its ID, Key and Secret to your user-secrets.
             // https://apiok.ru/en/dev/app/create
-            app.UseOdnoklassnikiAuthentication(o =>
+            auth.AddOdnoklassniki(o =>
             {
                 o.ClientId = Configuration["Odnoklassniki:ClientId"];
                 o.ApplicationKey = Configuration["Odnoklassniki:ApplicationKey"];
@@ -90,19 +77,17 @@ namespace OAuthClientSample
 
             // You must first create an app with VKontakte and add its ID and Secret to your user-secrets.
             // https://vk.com/apps?act=manage
-            app.UseOAuthAuthentication(new OAuthOptions
+            auth.AddOAuth("VKontakte-AccessToken", "VKontakte AccessToken only", o =>
             {
-                AuthenticationScheme = "VKontakte-AccessToken",
-                DisplayName = "VKontakte AccessToken only",
-                ClaimsIssuer = VKontakteDefaults.Issuer,
-                CallbackPath = new PathString("/signin-vkontakte-token"),
-                AuthorizationEndpoint = VKontakteDefaults.AuthorizationEndpoint,
-                TokenEndpoint = VKontakteDefaults.TokenEndpoint,
-                Scope = { "email" },
-                ClientId = Configuration["VKontakte:ClientId"],
-                ClientSecret = Configuration["VKontakte:ClientSecret"],
-                SaveTokens = true,
-                Events = new OAuthEvents
+                o.ClaimsIssuer = VKontakteDefaults.Issuer;
+                o.CallbackPath = new PathString("/signin-vkontakte-token");
+                o.AuthorizationEndpoint = VKontakteDefaults.AuthorizationEndpoint;
+                o.TokenEndpoint = VKontakteDefaults.TokenEndpoint;
+                o.Scope.Add("email");
+                o.ClientId = Configuration["VKontakte:ClientId"];
+                o.ClientSecret = Configuration["VKontakte:ClientSecret"];
+                o.SaveTokens = true;
+                o.Events = new OAuthEvents
                 {
                     OnCreatingTicket = context =>
                     {
@@ -114,12 +99,12 @@ namespace OAuthClientSample
                         return Task.FromResult(0);
                     },
                     OnRemoteFailure = HandleOnRemoteFailure
-                }
+                };
             });
 
             // You must first create an app with VKontakte and add its ID and Secret to your user-secrets.
             // https://vk.com/apps?act=manage
-            app.UseVKontakteAuthentication(o =>
+            auth.AddVKontakte(o =>
             {
                 o.ClientId = Configuration["VKontakte:ClientId"];
                 o.ClientSecret = Configuration["VKontakte:ClientSecret"];
@@ -129,6 +114,13 @@ namespace OAuthClientSample
                     OnRemoteFailure = HandleOnRemoteFailure
                 };
             });
+        }
+
+        public void Configure(IApplicationBuilder app)
+        {
+            app.UseDeveloperExceptionPage();
+
+            app.UseAuthentication();
 
             // A guard against tricky browsers
             app.Map("/favicon.ico", notFoundApp =>
@@ -150,7 +142,7 @@ namespace OAuthClientSample
                     {
                         // By default the client will be redirect back to the URL that issued the challenge (/login?authscheme=foo),
                         // send them to the home page instead (/).
-                        await context.Authentication.ChallengeAsync(authType, new AuthenticationProperties { RedirectUri = "/" });
+                        await context.ChallengeAsync(authType, new AuthenticationProperties { RedirectUri = "/" });
                         return;
                     }
 
@@ -158,9 +150,10 @@ namespace OAuthClientSample
                     response.ContentType = "text/html; charset=utf-8";
                     await response.WriteAsync("<html><body>");
                     await response.WriteAsync("Choose an authentication scheme:<ul>");
-                    foreach (var provider in context.Authentication.GetAuthenticationSchemes())
+                    var schemeProvider = context.RequestServices.GetRequiredService<IAuthenticationSchemeProvider>();
+                    foreach (var provider in await schemeProvider.GetAllSchemesAsync())
                     {
-                        await response.WriteAsync("<li><a href=\"?authscheme=" + UrlEncoder.Default.Encode(provider.AuthenticationScheme) + "\">" + (provider.DisplayName ?? "(suppressed)") + "</a></li>");
+                        await response.WriteAsync("<li><a href=\"?authscheme=" + UrlEncoder.Default.Encode(provider.Name) + "\">" + (provider.DisplayName ?? "(suppressed)") + "</a></li>");
                     }
                     await response.WriteAsync("</ul></body></html>");
                 });
@@ -173,7 +166,7 @@ namespace OAuthClientSample
                 {
                     var response = context.Response;
                     response.ContentType = "text/html; charset=utf-8";
-                    await context.Authentication.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                    await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
                     await response.WriteAsync("<html><body>");
                     await response.WriteAsync("You have been logged out. Goodbye " + context.User.Identity.Name + "<br>");
                     await response.WriteAsync("<a href=\"/\">Home</a>");
@@ -201,14 +194,14 @@ namespace OAuthClientSample
                 var user = context.User;
 
                 // This is what [Authorize] calls
-                // var user = await context.Authentication.AuthenticateAsync(AuthenticationManager.AutomaticScheme);
+                // var user = await context.AuthenticateAsync(AuthenticationManager.AutomaticScheme);
 
                 // Deny anonymous request beyond this point.
                 if (user == null || !user.Identities.Any(identity => identity.IsAuthenticated))
                 {
                     // This is what [Authorize] calls
                     // The cookie middleware will handle this and redirect to /login
-                    await context.Authentication.ChallengeAsync();
+                    await context.ChallengeAsync();
 
                     return;
                 }
@@ -225,14 +218,14 @@ namespace OAuthClientSample
                 await response.WriteAsync("</ul><h2>Tokens:</h2><ul>");
                 foreach (var token in new[] { "access_token", "refresh_token", "token_type", "expires_at" })
                 {
-                    await response.WriteAsync("<dt>" + token + "</dt><dd>" + HtmlEncoder.Default.Encode(await context.Authentication.GetTokenAsync(token) ?? "") + "</dd>");
+                    await response.WriteAsync("<dt>" + token + "</dt><dd>" + HtmlEncoder.Default.Encode(await context.GetTokenAsync(token) ?? "") + "</dd>");
                 }
                 await response.WriteAsync("</ul><a href=\"/logout\">Logout</a><br>");
                 await response.WriteAsync("</body></html>");
             });
         }
 
-        private async Task HandleOnRemoteFailure(FailureContext context)
+        private static async Task HandleOnRemoteFailure(RemoteFailureContext context)
         {
             var response = context.Response;
             response.StatusCode = 500;

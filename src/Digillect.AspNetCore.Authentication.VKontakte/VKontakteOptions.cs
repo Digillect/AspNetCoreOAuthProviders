@@ -3,13 +3,15 @@
 // See https://github.com/aspnet-contrib/AspNet.Security.OAuth.Providers for more information.
 
 using System.Collections.Generic;
-using Microsoft.AspNetCore.Builder;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.AspNetCore.Http;
 
 namespace Digillect.AspNetCore.Authentication.VKontakte
 {
     /// <summary>
-    /// Configuration options for <see cref="VKontakteMiddleware"/>.
+    /// Configuration options for <see cref="VKontakteHandler"/>.
     /// </summary>
     public class VKontakteOptions : OAuthOptions
     {
@@ -18,8 +20,6 @@ namespace Digillect.AspNetCore.Authentication.VKontakte
         /// </summary>
         public VKontakteOptions()
         {
-            AuthenticationScheme = VKontakteDefaults.AuthenticationScheme;
-            DisplayName = VKontakteDefaults.DisplayName;
             ClaimsIssuer = VKontakteDefaults.Issuer;
 
             CallbackPath = new PathString("/signin-vkontakte");
@@ -29,6 +29,12 @@ namespace Digillect.AspNetCore.Authentication.VKontakte
             UserInformationEndpoint = VKontakteDefaults.UserInformationEndpoint;
 
             Scope.Add("email");
+
+            ClaimActions.MapJsonKey(ClaimTypes.NameIdentifier, "uid");
+            ClaimActions.MapJsonKey(ClaimTypes.GivenName, "first_name");
+            ClaimActions.MapJsonKey(ClaimTypes.Surname, "last_name");
+            ClaimActions.MapJsonKey(ClaimTypes.Name, "screen_name");
+            ClaimActions.MapJsonKey("urn:vkontakte:link", "photo_50");
         }
 
         /// <summary>

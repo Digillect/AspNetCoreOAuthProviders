@@ -8,21 +8,26 @@ using System.Net.Http;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.OAuth;
-using Microsoft.AspNetCore.Http.Authentication;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Linq;
 
 namespace Digillect.AspNetCore.Authentication.Odnoklassniki
 {
     internal class OdnoklassnikiHandler : OAuthHandler<OdnoklassnikiOptions>
     {
-        public OdnoklassnikiHandler([NotNull] HttpClient client)
-            : base(client)
+        public OdnoklassnikiHandler(
+            [NotNull] IOptionsMonitor<OdnoklassnikiOptions> options,
+            [NotNull] ILoggerFactory logger,
+            [NotNull] UrlEncoder encoder,
+            [NotNull] ISystemClock clock)
+            : base(options, logger, encoder, clock)
         {
         }
 
@@ -61,48 +66,12 @@ namespace Digillect.AspNetCore.Authentication.Odnoklassniki
 
             var payload = JObject.Parse(await response.Content.ReadAsStringAsync());
 
-            var ticket = new AuthenticationTicket(new ClaimsPrincipal(identity), properties, Options.AuthenticationScheme);
-            var context = new OAuthCreatingTicketContext(ticket, Context, Options, Backchannel, tokens, payload);
+            var context = new OAuthCreatingTicketContext(new ClaimsPrincipal(identity), properties, Context, Scheme, Options, Backchannel, tokens, payload);
+            context.RunClaimActions();
 
-            string identifier = OdnoklassnikiHelper.GetId(payload);
-            if (!string.IsNullOrEmpty(identifier))
-            {
-                identity.AddClaim(new Claim(ClaimTypes.NameIdentifier, identifier, ClaimValueTypes.String, Options.ClaimsIssuer));
-            }
+            await Events.CreatingTicket(context);
 
-            string name = OdnoklassnikiHelper.GetName(payload);
-            if (!string.IsNullOrEmpty(name))
-            {
-                identity.AddClaim(new Claim(ClaimTypes.Name, name, ClaimValueTypes.String, Options.ClaimsIssuer));
-            }
-
-            string email = OdnoklassnikiHelper.GetEmail(payload);
-            if (!string.IsNullOrEmpty(email))
-            {
-                identity.AddClaim(new Claim(ClaimTypes.Email, email, ClaimValueTypes.Email, Options.ClaimsIssuer));
-            }
-
-            string firstName = OdnoklassnikiHelper.GetFirstName(payload);
-            if (!string.IsNullOrEmpty(firstName))
-            {
-                identity.AddClaim(new Claim(ClaimTypes.GivenName, firstName, ClaimValueTypes.String, Options.ClaimsIssuer));
-            }
-
-            string lastName = OdnoklassnikiHelper.GetLastName(payload);
-            if (!string.IsNullOrEmpty(lastName))
-            {
-                identity.AddClaim(new Claim(ClaimTypes.Surname, lastName, ClaimValueTypes.String, Options.ClaimsIssuer));
-            }
-
-            string link = OdnoklassnikiHelper.GetLink(payload);
-            if (!string.IsNullOrEmpty(link))
-            {
-                identity.AddClaim(new Claim("urn:odnoklassniki:link", link, ClaimValueTypes.String, Options.ClaimsIssuer));
-            }
-
-            await Options.Events.CreatingTicket(context);
-
-            return context.Ticket;
+            return new AuthenticationTicket(context.Principal, context.Properties, Scheme.Name);
         }
 
         protected override string FormatScope() => string.Join(",", Options.Scope);

@@ -5,21 +5,26 @@
 
 using System.Net.Http;
 using System.Security.Claims;
+using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.OAuth;
-using Microsoft.AspNetCore.Http.Authentication;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Linq;
 
 namespace Digillect.AspNetCore.Authentication.VKontakte
 {
     internal class VKontakteHandler : OAuthHandler<VKontakteOptions>
     {
-        public VKontakteHandler(HttpClient client)
-            : base(client)
+        public VKontakteHandler(
+            [NotNull] IOptionsMonitor<VKontakteOptions> options,
+            [NotNull] ILoggerFactory logger,
+            [NotNull] UrlEncoder encoder,
+            [NotNull] ISystemClock clock)
+            : base(options, logger, encoder, clock)
         {
         }
 
@@ -47,38 +52,8 @@ namespace Digillect.AspNetCore.Authentication.VKontakte
             var payload = JObject.Parse(await response.Content.ReadAsStringAsync());
             var user = (JObject) payload["response"][0];
 
-            var ticket = new AuthenticationTicket(new ClaimsPrincipal(identity), properties, Options.AuthenticationScheme);
-            var context = new OAuthCreatingTicketContext(ticket, Context, Options, Backchannel, tokens, user);
-
-            string identifier = VKontakteHelper.GetId(user);
-            if (!string.IsNullOrEmpty(identifier))
-            {
-                identity.AddClaim(new Claim(ClaimTypes.NameIdentifier, identifier, ClaimValueTypes.String, Options.ClaimsIssuer));
-            }
-
-            string firstName = VKontakteHelper.GetFirstName(user);
-            if (!string.IsNullOrEmpty(firstName))
-            {
-                identity.AddClaim(new Claim(ClaimTypes.GivenName, firstName, ClaimValueTypes.String, Options.ClaimsIssuer));
-            }
-
-            string lastName = VKontakteHelper.GetLastName(user);
-            if (!string.IsNullOrEmpty(lastName))
-            {
-                identity.AddClaim(new Claim(ClaimTypes.Surname, lastName, ClaimValueTypes.String, Options.ClaimsIssuer));
-            }
-
-            string name = VKontakteHelper.GetScreenName(user);
-            if (!string.IsNullOrEmpty(name))
-            {
-                identity.AddClaim(new Claim(ClaimTypes.Name, name, ClaimValueTypes.String, Options.ClaimsIssuer));
-            }
-
-            string photo = VKontakteHelper.GetPhoto(user);
-            if (!string.IsNullOrEmpty(photo))
-            {
-                identity.AddClaim(new Claim("urn:vkontakte:link", photo, ClaimValueTypes.String, Options.ClaimsIssuer));
-            }
+            var context = new OAuthCreatingTicketContext(new ClaimsPrincipal(identity), properties, Context, Scheme, Options, Backchannel, tokens, user);
+            context.RunClaimActions();
 
             if (!identity.HasClaim(claim => claim.Type == ClaimTypes.Email) && Options.Scope.Contains("email"))
             {
@@ -89,9 +64,9 @@ namespace Digillect.AspNetCore.Authentication.VKontakte
                 }
             }
 
-            await Options.Events.CreatingTicket(context);
+            await Events.CreatingTicket(context);
 
-            return context.Ticket;
+            return new AuthenticationTicket(context.Principal, context.Properties, Scheme.Name);
         }
     }
 }

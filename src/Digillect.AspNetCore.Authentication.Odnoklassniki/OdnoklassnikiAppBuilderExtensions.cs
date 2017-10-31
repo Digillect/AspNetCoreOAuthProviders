@@ -4,7 +4,6 @@
 using System;
 using Digillect.AspNetCore.Authentication.Odnoklassniki;
 using JetBrains.Annotations;
-using Microsoft.Extensions.Options;
 
 namespace Microsoft.AspNetCore.Builder
 {
@@ -14,53 +13,31 @@ namespace Microsoft.AspNetCore.Builder
     public static class OdnoklassnikiAppBuilderExtensions
     {
         /// <summary>
-        /// Adds the <see cref="OdnoklassnikiMiddleware"/> middleware to the specified
-        /// <see cref="IApplicationBuilder"/>, which enables Odnoklassniki authentication capabilities.
+        /// Obsolete, see https://go.microsoft.com/fwlink/?linkid=845470
         /// </summary>
-        /// <param name="app">The <see cref="IApplicationBuilder"/> to add the middleware to.</param>
-        /// <param name="options">A <see cref="OdnoklassnikiOptions"/> that specifies options for the middleware.</param>
+        /// <param name="app">The <see cref="IApplicationBuilder"/> to add the handler to.</param>
+        /// <param name="options">A <see cref="OdnoklassnikiOptions"/> that specifies options for the handler.</param>
         /// <returns>A reference to this instance after the operation has completed.</returns>
+        [Obsolete("See https://go.microsoft.com/fwlink/?linkid=845470", true)]
         public static IApplicationBuilder UseOdnoklassnikiAuthentication(
             [NotNull] this IApplicationBuilder app,
             [NotNull] OdnoklassnikiOptions options)
         {
-            if (app == null)
-            {
-                throw new ArgumentNullException(nameof(app));
-            }
-
-            if (options == null)
-            {
-                throw new ArgumentNullException(nameof(options));
-            }
-
-            return app.UseMiddleware<OdnoklassnikiMiddleware>(Options.Create(options));
+            throw new NotSupportedException("This method is no longer supported, see https://go.microsoft.com/fwlink/?linkid=845470");
         }
 
         /// <summary>
-        /// Adds the <see cref="OdnoklassnikiMiddleware"/> middleware to the specified <see cref="IApplicationBuilder"/>, which enables Odnoklassniki authentication capabilities.
+        /// Obsolete, see https://go.microsoft.com/fwlink/?linkid=845470
         /// </summary>
-        /// <param name="app">The <see cref="IApplicationBuilder"/> to add the middleware to.</param>
+        /// <param name="app">The <see cref="IApplicationBuilder"/> to add the handler to.</param>
         /// <param name="configuration">An action delegate to configure the provided <see cref="OdnoklassnikiOptions"/>.</param>
         /// <returns>A reference to this instance after the operation has completed.</returns>
+        [Obsolete("See https://go.microsoft.com/fwlink/?linkid=845470", true)]
         public static IApplicationBuilder UseOdnoklassnikiAuthentication(
             [NotNull] this IApplicationBuilder app,
             [NotNull] Action<OdnoklassnikiOptions> configuration)
         {
-            if (app == null)
-            {
-                throw new ArgumentNullException(nameof(app));
-            }
-
-            if (configuration == null)
-            {
-                throw new ArgumentNullException(nameof(configuration));
-            }
-
-            var options = new OdnoklassnikiOptions();
-            configuration(options);
-
-            return app.UseMiddleware<OdnoklassnikiMiddleware>(Options.Create(options));
+            throw new NotSupportedException("This method is no longer supported, see https://go.microsoft.com/fwlink/?linkid=845470");
         }
     }
 }
