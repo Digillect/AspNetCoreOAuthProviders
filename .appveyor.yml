@@ -4,10 +4,9 @@ init:
 branches:
   only:
     - master
-    - release
     - dev
-    - /^(.*\/)?ci-.*$/
-    - /^rel\/.*/
+    - /^release\/.*/
+skip_non_tags: true
 build_script:
   - ps: .\build.ps1
 clone_depth: 1
