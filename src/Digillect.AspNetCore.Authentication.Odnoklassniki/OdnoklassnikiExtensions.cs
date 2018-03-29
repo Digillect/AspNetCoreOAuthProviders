@@ -1,8 +1,5 @@
-/*
- * Licensed under the Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
- * See https://github.com/aspnet-contrib/AspNet.Security.OAuth.Providers
- * for more information concerning the license and the contributors participating to this project.
- */
+// Copyright (c) Andrew Nefedkin. All rights reserved.
+// Licensed under the Apache License, Version 2.0. See the LICENSE file in the project root for more information.
 
 using System;
 using Digillect.AspNetCore.Authentication.Odnoklassniki;

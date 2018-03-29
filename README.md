@@ -16,3 +16,8 @@ VKontakte (VK) | `Digillect.AspNetCore.Authentication.VKontakte`     | [![NuGet]
 While the [aspnet-contrib providers](https://github.com/aspnet-contrib/AspNet.Security.OAuth.Providers) is a great project I've decided (for reasons not to be mentioned here) to develop and maintain a separate one.
 
 This projects tries to mimic the original [aspnet/Security](https://github.com/aspnet/Security) repository in what concerns naming/styling conventions.
+
+## License
+
+This project is licensed under the [Apache License](http://www.apache.org/licenses/LICENSE-2.0).
+

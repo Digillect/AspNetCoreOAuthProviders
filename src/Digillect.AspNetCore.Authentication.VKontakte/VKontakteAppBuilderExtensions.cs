@@ -1,5 +1,5 @@
 // Copyright (c) aspnet-contrib project (Albert Zakiev, Kévin Chalet). All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+// Licensed under the Apache License, Version 2.0. See the LICENSE file in the project root for more information.
 // See https://github.com/aspnet-contrib/AspNet.Security.OAuth.Providers for more information.
 
 using System;
