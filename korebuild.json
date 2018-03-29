@@ -1,4 +1,4 @@
 {
   "$schema": "https://raw.githubusercontent.com/aspnet/BuildTools/dev/tools/korebuild.schema.json",
-  "channel": "rel/2.0.0"
+  "channel": "dev"
 }

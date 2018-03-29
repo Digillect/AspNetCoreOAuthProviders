@@ -6,6 +6,12 @@
   <Import Project="version.props" />
 
   <PropertyGroup>
+    <DefaultItemExcludes>$(DefaultItemExcludes);**\.git*;**\*~</DefaultItemExcludes>
+    <LangVersion>latest</LangVersion>
+    <CodeAnalysisRuleset>$(MSBuildThisFileDirectory)CodeAnalysis.ruleset</CodeAnalysisRuleset>
+  </PropertyGroup>
+
+  <PropertyGroup>
     <Product>ASP.NET Core OAuth 2.0 authentication providers.</Product>
     <RepositoryUrl>https://github.com/Digillect/AspNetCoreOAuthProviders</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
