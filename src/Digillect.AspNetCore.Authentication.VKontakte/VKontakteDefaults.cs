@@ -40,5 +40,10 @@ namespace Digillect.AspNetCore.Authentication.VKontakte
         /// Default value for <see cref="OAuthOptions.UserInformationEndpoint"/>.
         /// </summary>
         public const string UserInformationEndpoint = "https://api.vk.com/method/users.get.json";
+
+        /// <summary>
+        /// Default value for <see cref="VKontakteOptions.ApiVersion"/>.
+        /// </summary>
+        public const string ApiVersion = "5.73";
     }
 }

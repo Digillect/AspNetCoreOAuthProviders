@@ -32,12 +32,18 @@ namespace Digillect.AspNetCore.Authentication.VKontakte
         }
 
         /// <summary>
+        /// Gets or sets the VK API version to use.
+        /// See https://vk.com/dev/versions for more information.
+        /// </summary>
+        public string ApiVersion { get; set; } = VKontakteDefaults.ApiVersion;
+
+        /// <summary>
         /// Gets the list of fields to retrieve from the user information endpoint.
         /// See https://vk.com/dev/objects/user for more information.
         /// </summary>
         public ISet<string> Fields { get; } = new HashSet<string>
         {
-            "uid",
+            "id",
             "first_name",
             "last_name",
             "screen_name",

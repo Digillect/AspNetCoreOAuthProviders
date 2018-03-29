@@ -24,7 +24,7 @@ namespace Digillect.AspNetCore.Authentication.VKontakte
                 throw new ArgumentNullException(nameof(user));
             }
 
-            return user.Value<string>("uid");
+            return user.Value<string>("id");
         }
 
         /// <summary>

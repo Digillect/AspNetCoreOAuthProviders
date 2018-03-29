@@ -2,6 +2,8 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 // See https://github.com/aspnet-contrib/AspNet.Security.OAuth.Providers for more information.
 
+using System;
+using System.Globalization;
 using System.Text.Encodings.Web;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Authentication;
@@ -24,6 +26,10 @@ namespace Digillect.AspNetCore.Authentication.VKontakte
             [NotNull] IOptions<VKontakteOptions> options)
             : base(next, dataProtectionProvider, loggerFactory, encoder, sharedOptions, options)
         {
+            if (string.IsNullOrEmpty(Options.ApiVersion))
+            {
+                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, Resources.Exception_OptionMustBeProvided, nameof(Options.ApiVersion)), nameof(Options.ApiVersion));
+            }
         }
 
         protected override AuthenticationHandler<VKontakteOptions> CreateHandler()

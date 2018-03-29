@@ -3,6 +3,8 @@
 // See https://github.com/aspnet-contrib/AspNet.Security.OAuth.Providers for more information.
 // E-mail retrieval routine by f14shm4n.
 
+using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -25,12 +27,18 @@ namespace Digillect.AspNetCore.Authentication.VKontakte
 
         protected override async Task<AuthenticationTicket> CreateTicketAsync([NotNull] ClaimsIdentity identity, [NotNull] AuthenticationProperties properties, [NotNull] OAuthTokenResponse tokens)
         {
-            var address = QueryHelpers.AddQueryString(Options.UserInformationEndpoint, "access_token", tokens.AccessToken);
+            var queryString = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["access_token"] = tokens.AccessToken,
+                ["v"] = Options.ApiVersion
+            };
 
             if (Options.Fields.Count != 0)
             {
-                address = QueryHelpers.AddQueryString(address, "fields", string.Join(",", Options.Fields));
+                queryString.Add("fields", string.Join(",", Options.Fields));
             }
+
+            var address = QueryHelpers.AddQueryString(Options.UserInformationEndpoint, queryString);
 
             var response = await Backchannel.GetAsync(address, Context.RequestAborted);
             if (!response.IsSuccessStatusCode)
@@ -45,7 +53,12 @@ namespace Digillect.AspNetCore.Authentication.VKontakte
             }
 
             var payload = JObject.Parse(await response.Content.ReadAsStringAsync());
-            var user = (JObject) payload["response"][0];
+            var error = payload["error"];
+            if (error != null)
+            {
+                throw new Exception(error.Value<string>("error_msg"));
+            }
+            var user = (JObject) payload["response"]?[0];
 
             var ticket = new AuthenticationTicket(new ClaimsPrincipal(identity), properties, Options.AuthenticationScheme);
             var context = new OAuthCreatingTicketContext(ticket, Context, Options, Backchannel, tokens, user);

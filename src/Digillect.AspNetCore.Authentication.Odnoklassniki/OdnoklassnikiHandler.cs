@@ -28,9 +28,6 @@ namespace Digillect.AspNetCore.Authentication.Odnoklassniki
 
         protected override async Task<AuthenticationTicket> CreateTicketAsync([NotNull] ClaimsIdentity identity, [NotNull] AuthenticationProperties properties, [NotNull] OAuthTokenResponse tokens)
         {
-            // Call API methods using access_token instead of session_key parameter
-            var address = QueryHelpers.AddQueryString(Options.UserInformationEndpoint, "access_token", tokens.AccessToken);
-
             var queryString = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
                 ["application_key"] = Options.ApplicationKey,
@@ -45,7 +42,10 @@ namespace Digillect.AspNetCore.Authentication.Odnoklassniki
 
             queryString.Add("sig", ComputeSignature(tokens.AccessToken, queryString));
 
-            address = QueryHelpers.AddQueryString(address, queryString);
+            // Call API methods using access_token instead of session_key parameter
+            queryString.Add("access_token", tokens.AccessToken);
+
+            var address = QueryHelpers.AddQueryString(Options.UserInformationEndpoint, queryString);
 
             HttpResponseMessage response = await Backchannel.GetAsync(address, Context.RequestAborted);
             if (!response.IsSuccessStatusCode)
