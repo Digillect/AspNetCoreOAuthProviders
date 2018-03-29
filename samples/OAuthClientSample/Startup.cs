@@ -231,7 +231,8 @@ namespace OAuthClientSample
             response.StatusCode = 500;
             response.ContentType = "text/html; charset=utf-8";
             await response.WriteAsync("<html><body>");
-            await response.WriteAsync("A remote failure has occurred: " + HtmlEncoder.Default.Encode(context.Failure.Message) + "<br>");
+            await response.WriteAsync("<h1>A remote failure has occurred</h1>");
+            await response.WriteAsync(HtmlEncoder.Default.Encode(context.Failure.Source ?? "Unknown") + ": " + HtmlEncoder.Default.Encode(context.Failure.Message) + "<br>");
             await response.WriteAsync("<a href=\"/\">Home</a>");
             await response.WriteAsync("</body></html>");
 
