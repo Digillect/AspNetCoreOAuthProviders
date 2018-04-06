@@ -87,5 +87,17 @@ namespace Digillect.AspNetCore.Authentication.VKontakte
 
             return new AuthenticationTicket(context.Principal, context.Properties, Scheme.Name);
         }
+
+        protected override string BuildChallengeUrl(AuthenticationProperties properties, string redirectUri)
+        {
+            var url = base.BuildChallengeUrl(properties, redirectUri);
+
+            if (!string.IsNullOrEmpty(Options.AuthorizationPageAppearance))
+            {
+                url = QueryHelpers.AddQueryString(url, "display", Options.AuthorizationPageAppearance);
+            }
+
+            return url;
+        }
     }
 }

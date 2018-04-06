@@ -46,6 +46,22 @@ namespace Digillect.AspNetCore.Authentication.VKontakte
         public string ApiVersion { get; set; } = VKontakteDefaults.ApiVersion;
 
         /// <summary>
+        /// Gets or sets authorization page appearance.
+        /// </summary>
+        /// <value>
+        /// <list type="bullet">
+        /// <listheader>The supported values are:</listheader>
+        /// <item>page — authorization form in a separate window;</item>
+        /// <item>popup — a pop-up window;</item>
+        /// <item>mobile — authorization for mobile devices(uses no Javascript).</item>
+        /// </list>
+        /// </value>
+        /// <remarks>
+        /// See https://vk.com/dev/authcode_flow_user of https://vk.com/dev/oauth_dialog for actual information.
+        /// </remarks>
+        public string AuthorizationPageAppearance { get; set; }
+
+        /// <summary>
         /// Gets the list of fields to retrieve from the user information endpoint.
         /// See https://vk.com/dev/objects/user for more information.
         /// </summary>
