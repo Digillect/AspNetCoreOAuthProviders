@@ -91,7 +91,8 @@ namespace OAuthClientSample
                 {
                     OnCreatingTicket = context =>
                     {
-                        var email = context.TokenResponse.Response["email"]?.Value<string>();
+                        context.Identity.AddClaim(new Claim(ClaimTypes.NameIdentifier, context.TokenResponse.Response.Value<string>("user_id"), ClaimValueTypes.String, context.Options.ClaimsIssuer));
+                        var email = context.TokenResponse.Response.Value<string>("email");
                         if (!string.IsNullOrEmpty(email))
                         {
                             context.Identity.AddClaim(new Claim(ClaimTypes.Email, email, ClaimValueTypes.Email, context.Options.ClaimsIssuer));

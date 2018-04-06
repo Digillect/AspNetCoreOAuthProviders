@@ -57,25 +57,31 @@ namespace Digillect.AspNetCore.Authentication.VKontakte
                 throw new HttpRequestException($"An error occurred when retrieving user information ({response.StatusCode}).");
             }
 
-            var payload = JObject.Parse(await response.Content.ReadAsStringAsync());
-            var error = payload["error"];
-            if (error != null)
+            if (Options.Scope.Contains("email"))
             {
-                throw new Exception(error.Value<string>("error_msg"));
-            }
-            var user = (JObject) payload["response"]?[0];
-
-            var context = new OAuthCreatingTicketContext(new ClaimsPrincipal(identity), properties, Context, Scheme, Options, Backchannel, tokens, user);
-            context.RunClaimActions();
-
-            if (!identity.HasClaim(claim => claim.Type == ClaimTypes.Email) && Options.Scope.Contains("email"))
-            {
-                var email = tokens.Response["email"]?.Value<string>();
+                var email = tokens.Response.Value<string>("email");
                 if (!string.IsNullOrEmpty(email))
                 {
                     identity.AddClaim(new Claim(ClaimTypes.Email, email, ClaimValueTypes.Email, Options.ClaimsIssuer));
                 }
             }
+
+            var payload = JObject.Parse(await response.Content.ReadAsStringAsync());
+            var error = payload["error"];
+            if (error != null)
+            {
+                Logger.LogError("An error occurred while retrieving the user profile: the provider returned an error {ErrorCode} with the message: \"{ErrorMessage}\"",
+                                /* ErrorCode */ error.Value<int>("error_code"),
+                                /* ErrorMessage */ error.Value<string>("error_msg"));
+
+                identity.AddClaim(new Claim(ClaimTypes.NameIdentifier, tokens.Response.Value<string>("user_id"), ClaimValueTypes.String, Options.ClaimsIssuer));
+
+                return await base.CreateTicketAsync(identity, properties, tokens);
+            }
+            var user = (JObject) payload["response"]?[0];
+
+            var context = new OAuthCreatingTicketContext(new ClaimsPrincipal(identity), properties, Context, Scheme, Options, Backchannel, tokens, user);
+            context.RunClaimActions();
 
             await Events.CreatingTicket(context);
 
