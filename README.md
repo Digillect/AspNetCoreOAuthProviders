@@ -1,15 +1,19 @@
 # ASP.NET Core OAuth 2.0 Providers
 
-[![AppVeyor build status](https://img.shields.io/appveyor/ci/Digillect/AspNetCoreOAuthProviders/dev.svg?label=AppVeyor)](https://ci.appveyor.com/project/Digillect/aspnetcoreoauthproviders) [![Travis build status](https://img.shields.io/travis/Digillect/AspNetCoreOAuthProviders/dev.svg?label=Travis+CI)](https://travis-ci.org/Digillect/AspNetCoreOAuthProviders)
+| Release | Branch      |                           AppVeyor                           |                          Travis CI                           |
+| ------- | ----------- | :----------------------------------------------------------: | :----------------------------------------------------------: |
+| 1.0.x   | release/1.0 | [![Build status](https://ci.appveyor.com/api/projects/status/m477shft5srn0xq9/branch/release/1.0?svg=true)](https://ci.appveyor.com/project/Digillect/aspnetcoreoauthproviders/branch/release/1.0) | [![Build Status](https://travis-ci.org/Digillect/AspNetCoreOAuthProviders.svg?branch=release%2F1.0)](https://travis-ci.org/Digillect/AspNetCoreOAuthProviders) |
+| 2.0.x   | release/2.0 | [![Build status](https://ci.appveyor.com/api/projects/status/m477shft5srn0xq9/branch/release/2.0?svg=true)](https://ci.appveyor.com/project/Digillect/aspnetcoreoauthproviders/branch/release/2.0) | [![Build Status](https://travis-ci.org/Digillect/AspNetCoreOAuthProviders.svg?branch=release%2F2.0)](https://travis-ci.org/Digillect/AspNetCoreOAuthProviders) |
+| 2.1.x   | dev         | [![Build status](https://ci.appveyor.com/api/projects/status/m477shft5srn0xq9/branch/dev?svg=true)](https://ci.appveyor.com/project/Digillect/aspnetcoreoauthproviders/branch/dev) | [![Build Status](https://travis-ci.org/Digillect/AspNetCoreOAuthProviders.svg?branch=dev)](https://travis-ci.org/Digillect/AspNetCoreOAuthProviders) |
 
 Contains the OAuth 2.0 authentication providers for ASP.NET Core.
 
 ## Providers List
 
-Provider       | Package name                                        | NuGet
--------------- |-----------------------------------------------------|-----------------------------
-Odnoklassniki  | `Digillect.AspNetCore.Authentication.Odnoklassniki` | [![NuGet](https://img.shields.io/nuget/v/Digillect.AspNetCore.Authentication.Odnoklassniki.svg)](https://www.nuget.org/packages/Digillect.AspNetCore.Authentication.Odnoklassniki)
-VKontakte (VK) | `Digillect.AspNetCore.Authentication.VKontakte`     | [![NuGet](https://img.shields.io/nuget/v/Digillect.AspNetCore.Authentication.VKontakte.svg)](https://www.nuget.org/packages/Digillect.AspNetCore.Authentication.VKontakte)
+| Provider       | Package name                                        |                            NuGet                             |
+| -------------- | --------------------------------------------------- | :----------------------------------------------------------: |
+| Odnoklassniki  | `Digillect.AspNetCore.Authentication.Odnoklassniki` | [![NuGet](https://img.shields.io/nuget/v/Digillect.AspNetCore.Authentication.Odnoklassniki.svg)](https://www.nuget.org/packages/Digillect.AspNetCore.Authentication.Odnoklassniki) |
+| VKontakte (VK) | `Digillect.AspNetCore.Authentication.VKontakte`     | [![NuGet](https://img.shields.io/nuget/v/Digillect.AspNetCore.Authentication.VKontakte.svg)](https://www.nuget.org/packages/Digillect.AspNetCore.Authentication.VKontakte) |
 
 ## Notes
 

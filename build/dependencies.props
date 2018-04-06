@@ -4,10 +4,9 @@
   </PropertyGroup>
 
   <PropertyGroup Label="Package Versions">
-    <AspNetCoreVersion>2.0.0</AspNetCoreVersion>
-    <CoreFxVersion>4.4.0</CoreFxVersion>
+    <AspNetCoreVersion>2.1.0-preview1-final</AspNetCoreVersion>
     <JetBrainsVersion>11.1.0</JetBrainsVersion>
     <NetStandardImplicitPackageVersion>2.0.0</NetStandardImplicitPackageVersion>
-    <RuntimeFrameworkVersion>2.0.0</RuntimeFrameworkVersion>
+    <RuntimeFrameworkVersion>2.1.0-preview1-*</RuntimeFrameworkVersion>
   </PropertyGroup>
 </Project>
