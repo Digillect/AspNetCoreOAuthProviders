@@ -65,6 +65,7 @@ namespace OAuthClientSample
             // https://apiok.ru/en/dev/app/create
             auth.AddOdnoklassniki(o =>
             {
+                //o.UserInformationEndpoint = "https://api.ok.ru/fb.do?method=users.getCurrentUser";
                 o.ClientId = Configuration["Odnoklassniki:ClientId"];
                 o.ApplicationKey = Configuration["Odnoklassniki:ApplicationKey"];
                 o.ClientSecret = Configuration["Odnoklassniki:ClientSecret"];

@@ -45,12 +45,27 @@ namespace Digillect.AspNetCore.Authentication.Odnoklassniki
                 queryString.Add("fields", string.Join(",", Options.Fields));
             }
 
+            string address = Options.UserInformationEndpoint;
+
+            if (address.IndexOf('?') >= 0)
+            {
+                var uri = new Uri(address);
+                address = uri.GetLeftPart(UriPartial.Path);
+                foreach (var item in QueryHelpers.ParseQuery(uri.Query))
+                {
+                    if (!queryString.ContainsKey(item.Key))
+                    {
+                        queryString.Add(item.Key, item.Value);
+                    }
+                }
+            }
+
             queryString.Add("sig", ComputeSignature(tokens.AccessToken, queryString));
 
             // Call API methods using access_token instead of session_key parameter
             queryString.Add("access_token", tokens.AccessToken);
 
-            var address = QueryHelpers.AddQueryString(Options.UserInformationEndpoint, queryString);
+            address = QueryHelpers.AddQueryString(address, queryString);
 
             HttpResponseMessage response = await Backchannel.GetAsync(address, Context.RequestAborted);
             if (!response.IsSuccessStatusCode)
@@ -65,6 +80,15 @@ namespace Digillect.AspNetCore.Authentication.Odnoklassniki
             }
 
             var payload = JObject.Parse(await response.Content.ReadAsStringAsync());
+            if (payload["error_code"] != null)
+            {
+                Logger.LogError("An error occurred while retrieving the user profile: the provider returned an error {ErrorCode} with the message \"{ErrorMessage}\" and data \"{ErrorData}\"",
+                                /* ErrorCode */ payload.Value<int>("error_code"),
+                                /* ErrorMessage */ payload.Value<string>("error_msg"),
+                                /* ErrorData */ payload.Value<string>("error_data"));
+
+                return null;
+            }
 
             var context = new OAuthCreatingTicketContext(new ClaimsPrincipal(identity), properties, Context, Scheme, Options, Backchannel, tokens, payload);
             context.RunClaimActions();
@@ -92,19 +116,14 @@ namespace Digillect.AspNetCore.Authentication.Odnoklassniki
                                                 orderby parameter.Key
                                                 select $"{parameter.Key}={parameter.Value}");
 
-            var utf8nobom = new UTF8Encoding(false);
-
-            string GetMd5Hash(string input)
+            using (var provider = MD5.Create())
             {
-                using (var provider = MD5.Create())
-                {
-                    var bytes = utf8nobom.GetBytes(input);
-                    bytes = provider.ComputeHash(bytes);
-                    return BitConverter.ToString(bytes).Replace("-", "").ToLowerInvariant();
-                }
+                var bytes = Encoding.UTF8.GetBytes(accessToken + Options.ClientSecret);
+                bytes = provider.ComputeHash(bytes);
+                bytes = Encoding.UTF8.GetBytes(parametersValue + BitConverter.ToString(bytes).Replace("-", "").ToLowerInvariant());
+                bytes = provider.ComputeHash(bytes);
+                return BitConverter.ToString(bytes).Replace("-", "").ToLowerInvariant();
             }
-
-            return GetMd5Hash(parametersValue + GetMd5Hash(accessToken + Options.ClientSecret));
         }
     }
 }
