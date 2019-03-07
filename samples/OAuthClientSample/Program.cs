@@ -1,6 +1,5 @@
-using System.IO;
+﻿using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Logging;
 
 namespace OAuthClientSample
 {
@@ -8,15 +7,7 @@ namespace OAuthClientSample
     {
         public static void Main(string[] args)
         {
-            var host = new WebHostBuilder()
-                .ConfigureLogging(factory =>
-                {
-                    factory.AddConsole();
-                    factory.AddFilter("Console", level => level >= LogLevel.Information);
-                })
-                .UseKestrel()
-                .UseContentRoot(Directory.GetCurrentDirectory())
-                .UseIISIntegration()
+            var host = WebHost.CreateDefaultBuilder()
                 .UseStartup<Startup>()
                 .Build();
 

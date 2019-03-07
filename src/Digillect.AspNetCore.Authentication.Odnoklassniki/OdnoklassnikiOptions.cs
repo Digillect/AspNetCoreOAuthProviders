@@ -1,4 +1,4 @@
-// Copyright (c) Andrew Nefedkin. All rights reserved.
+﻿// Copyright (c) Andrew Nefedkin. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See the LICENSE file in the project root for more information.
 
 using System;
@@ -49,7 +49,7 @@ namespace Digillect.AspNetCore.Authentication.Odnoklassniki
         /// Gets the list of fields to retrieve from the user information endpoint.
         /// See https://apiok.ru/en/dev/methods/rest/users/users.getCurrentUser for more information.
         /// </summary>
-        public ISet<string> Fields { get; } = new HashSet<string>
+        public ICollection<string> Fields { get; } = new HashSet<string>
         {
             "uid",
             "name",

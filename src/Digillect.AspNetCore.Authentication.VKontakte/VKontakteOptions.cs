@@ -1,4 +1,4 @@
-// Copyright (c) aspnet-contrib project (Albert Zakiev, Kévin Chalet). All rights reserved.
+﻿// Copyright (c) aspnet-contrib project (Albert Zakiev, Kévin Chalet). All rights reserved.
 // Licensed under the Apache License, Version 2.0. See the LICENSE file in the project root for more information.
 // See https://github.com/aspnet-contrib/AspNet.Security.OAuth.Providers for more information.
 
@@ -53,11 +53,11 @@ namespace Digillect.AspNetCore.Authentication.VKontakte
         /// <listheader>The supported values are:</listheader>
         /// <item>page — authorization form in a separate window;</item>
         /// <item>popup — a pop-up window;</item>
-        /// <item>mobile — authorization for mobile devices(uses no Javascript).</item>
+        /// <item>mobile — authorization for mobile devices (uses no Javascript).</item>
         /// </list>
         /// </value>
         /// <remarks>
-        /// See https://vk.com/dev/authcode_flow_user of https://vk.com/dev/oauth_dialog for actual information.
+        /// See https://vk.com/dev/authcode_flow_user or https://vk.com/dev/oauth_dialog for actual information.
         /// </remarks>
         public string AuthorizationPageAppearance { get; set; }
 
@@ -65,7 +65,7 @@ namespace Digillect.AspNetCore.Authentication.VKontakte
         /// Gets the list of fields to retrieve from the user information endpoint.
         /// See https://vk.com/dev/objects/user for more information.
         /// </summary>
-        public ISet<string> Fields { get; } = new HashSet<string>
+        public ICollection<string> Fields { get; } = new HashSet<string>
         {
             "id",
             "first_name",

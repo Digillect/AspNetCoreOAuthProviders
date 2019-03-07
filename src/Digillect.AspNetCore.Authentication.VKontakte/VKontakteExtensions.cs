@@ -16,7 +16,7 @@ namespace Microsoft.Extensions.DependencyInjection
     {
         /// <summary>
         /// Adds the <see cref="VKontakteHandler"/> to the specified
-        /// <see cref="AuthenticationBuilder"/>, which enables Vkontakte authentication capabilities.
+        /// <see cref="AuthenticationBuilder"/>, which enables VKontakte authentication capabilities.
         /// </summary>
         /// <param name="builder">The authentication builder.</param>
         /// <returns>A reference to this instance after the operation has completed.</returns>
@@ -37,7 +37,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
         /// <summary>
         /// Adds the <see cref="VKontakteHandler"/> to the specified
-        /// <see cref="AuthenticationBuilder"/>, which enables Vkontakte authentication capabilities.
+        /// <see cref="AuthenticationBuilder"/>, which enables VKontakte authentication capabilities.
         /// </summary>
         /// <param name="builder">The authentication builder.</param>
         /// <param name="authenticationScheme"></param>

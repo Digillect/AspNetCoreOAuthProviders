@@ -1,12 +1,10 @@
-<Project>
+﻿<Project>
   <PropertyGroup>
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
   </PropertyGroup>
 
   <PropertyGroup Label="Package Versions">
-    <AspNetCoreVersion>2.1.0-preview1-final</AspNetCoreVersion>
-    <JetBrainsVersion>11.1.0</JetBrainsVersion>
-    <NetStandardImplicitPackageVersion>2.0.0</NetStandardImplicitPackageVersion>
-    <RuntimeFrameworkVersion>2.1.0-preview1-*</RuntimeFrameworkVersion>
+    <MicrosoftAspNetCoreAuthenticationOAuthPackageVersion>3.0.0-preview4-19123-01</MicrosoftAspNetCoreAuthenticationOAuthPackageVersion>
+    <JetBrainsAnnotationsPackageVersion>2019.1.1</JetBrainsAnnotationsPackageVersion>
   </PropertyGroup>
 </Project>

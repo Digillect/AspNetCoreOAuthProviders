@@ -1,4 +1,4 @@
-// Copyright (c) Andrew Nefedkin. All rights reserved.
+﻿// Copyright (c) Andrew Nefedkin. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See the LICENSE file in the project root for more information.
 
 using System;
@@ -9,6 +9,7 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Encodings.Web;
+using System.Text.Json;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Authentication;
@@ -16,7 +17,6 @@ using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json.Linq;
 
 namespace Digillect.AspNetCore.Authentication.Odnoklassniki
 {
@@ -53,10 +53,7 @@ namespace Digillect.AspNetCore.Authentication.Odnoklassniki
                 address = uri.GetLeftPart(UriPartial.Path);
                 foreach (var item in QueryHelpers.ParseQuery(uri.Query))
                 {
-                    if (!queryString.ContainsKey(item.Key))
-                    {
-                        queryString.Add(item.Key, item.Value);
-                    }
+                    queryString.TryAdd(item.Key, item.Value);
                 }
             }
 
@@ -67,7 +64,7 @@ namespace Digillect.AspNetCore.Authentication.Odnoklassniki
 
             address = QueryHelpers.AddQueryString(address, queryString);
 
-            HttpResponseMessage response = await Backchannel.GetAsync(address, Context.RequestAborted);
+            var response = await Backchannel.GetAsync(address, Context.RequestAborted);
             if (!response.IsSuccessStatusCode)
             {
                 Logger.LogError("An error occurred while retrieving the user profile: the remote server " +
@@ -79,23 +76,25 @@ namespace Digillect.AspNetCore.Authentication.Odnoklassniki
                 throw new HttpRequestException($"An error occurred when retrieving user information ({response.StatusCode}).");
             }
 
-            var payload = JObject.Parse(await response.Content.ReadAsStringAsync());
-            if (payload["error_code"] != null)
+            using (var payload = JsonDocument.Parse(await response.Content.ReadAsStringAsync()))
             {
-                Logger.LogError("An error occurred while retrieving the user profile: the provider returned an error {ErrorCode} with the message \"{ErrorMessage}\" and data \"{ErrorData}\"",
-                                /* ErrorCode */ payload.Value<int>("error_code"),
-                                /* ErrorMessage */ payload.Value<string>("error_msg"),
-                                /* ErrorData */ payload.Value<string>("error_data"));
+                if (payload.RootElement.TryGetProperty("error_code", out var errorCode))
+                {
+                    Logger.LogError("An error occurred while retrieving the user profile: the provider returned an error {ErrorCode} with the message \"{ErrorMessage}\" and data \"{ErrorData}\"",
+                                    /* ErrorCode */ errorCode.GetInt32(),
+                                    /* ErrorMessage */ payload.RootElement.GetString("error_msg"),
+                                    /* ErrorData */ payload.RootElement.GetString("error_data"));
 
-                return null;
+                    return null;
+                }
+
+                var context = new OAuthCreatingTicketContext(new ClaimsPrincipal(identity), properties, Context, Scheme, Options, Backchannel, tokens, payload.RootElement);
+                context.RunClaimActions();
+
+                await Events.CreatingTicket(context);
+
+                return new AuthenticationTicket(context.Principal, context.Properties, Scheme.Name);
             }
-
-            var context = new OAuthCreatingTicketContext(new ClaimsPrincipal(identity), properties, Context, Scheme, Options, Backchannel, tokens, payload);
-            context.RunClaimActions();
-
-            await Events.CreatingTicket(context);
-
-            return new AuthenticationTicket(context.Principal, context.Properties, Scheme.Name);
         }
 
         protected override string FormatScope() => string.Join(",", Options.Scope);

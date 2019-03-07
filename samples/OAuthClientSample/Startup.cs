@@ -1,6 +1,9 @@
-using System.Linq;
+﻿using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Text.Encodings.Web;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Digillect.AspNetCore.Authentication.Odnoklassniki;
 using Digillect.AspNetCore.Authentication.VKontakte;
@@ -12,27 +15,16 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Newtonsoft.Json.Linq;
+using Microsoft.Extensions.Hosting;
 
 namespace OAuthClientSample
 {
     /* Note all servers must use the same address and port because these are pre-registered with the various providers. */
     public class Startup
     {
-        public Startup(IHostingEnvironment env)
+        public Startup(IConfiguration configuration)
         {
-            var builder = new ConfigurationBuilder()
-                .SetBasePath(env.ContentRootPath)
-                .AddJsonFile("appsettings.json", optional: true);
-
-            if (env.IsDevelopment())
-            {
-                // For more details on using the user secret store see http://go.microsoft.com/fwlink/?LinkID=532709
-                builder.AddUserSecrets<Startup>();
-            }
-
-            builder.AddEnvironmentVariables();
-            Configuration = builder.Build();
+            Configuration = configuration;
         }
 
         public IConfiguration Configuration { get; }
@@ -85,6 +77,8 @@ namespace OAuthClientSample
                 o.AuthorizationEndpoint = VKontakteDefaults.AuthorizationEndpoint;
                 o.TokenEndpoint = VKontakteDefaults.TokenEndpoint;
                 o.Scope.Add("email");
+                o.ClaimActions.MapJsonKey(ClaimTypes.NameIdentifier, "user_id");
+                o.ClaimActions.MapJsonKey(ClaimTypes.Email, "email");
                 o.ClientId = Configuration["VKontakte:ClientId"];
                 o.ClientSecret = Configuration["VKontakte:ClientSecret"];
                 o.SaveTokens = true;
@@ -92,13 +86,8 @@ namespace OAuthClientSample
                 {
                     OnCreatingTicket = context =>
                     {
-                        context.Identity.AddClaim(new Claim(ClaimTypes.NameIdentifier, context.TokenResponse.Response.Value<string>("user_id"), ClaimValueTypes.String, context.Options.ClaimsIssuer));
-                        var email = context.TokenResponse.Response.Value<string>("email");
-                        if (!string.IsNullOrEmpty(email))
-                        {
-                            context.Identity.AddClaim(new Claim(ClaimTypes.Email, email, ClaimValueTypes.Email, context.Options.ClaimsIssuer));
-                        }
-                        return Task.FromResult(0);
+                        context.RunClaimActions(context.TokenResponse.Response.RootElement);
+                        return Task.CompletedTask;
                     },
                     OnRemoteFailure = HandleOnRemoteFailure
                 };
@@ -116,6 +105,58 @@ namespace OAuthClientSample
                     OnRemoteFailure = HandleOnRemoteFailure
                 };
             });
+
+            auth.AddOAuth("GitLab-AccessToken", "GitLab AccessToken only", o =>
+            {
+                o.CallbackPath = new PathString("/signin-gitlab-token");
+                o.AuthorizationEndpoint = "https://gitlab.com/oauth/authorize";
+                o.TokenEndpoint = "https://gitlab.com/oauth/token";
+                o.Scope.Add("openid");
+                o.ClientId = Configuration["GitLab:ClientId"];
+                o.ClientSecret = Configuration["GitLab:ClientSecret"];
+                o.SaveTokens = true;
+                o.Events = new OAuthEvents
+                {
+                    OnRemoteFailure = HandleOnRemoteFailure
+                };
+            });
+
+            auth.AddOAuth("GitLab", "GitLab", o =>
+            {
+                o.ClaimsIssuer = "GitLab";
+                o.CallbackPath = new PathString("/signin-gitlab");
+                o.AuthorizationEndpoint = "https://gitlab.com/oauth/authorize";
+                o.TokenEndpoint = "https://gitlab.com/oauth/token";
+                o.UserInformationEndpoint = "https://gitlab.com/api/v4/user";
+                o.Scope.Add("openid");
+                o.Scope.Add("api");
+                o.ClaimActions.MapJsonKey(ClaimTypes.NameIdentifier, "id");
+                o.ClaimActions.MapJsonKey(ClaimTypes.Name, "name");
+                o.ClaimActions.MapJsonKey(ClaimTypes.Email, "email", ClaimValueTypes.Email);
+                o.ClaimActions.MapJsonKey(ClaimTypes.Locality, "location");
+                o.ClaimActions.MapJsonKey(ClaimTypes.Webpage, "website");
+                o.ClaimActions.MapJsonKey("urn:gitlab:avatar_url", "avatar_url");
+                o.ClientId = Configuration["GitLab:ClientId"];
+                o.ClientSecret = Configuration["GitLab:ClientSecret"];
+                o.SaveTokens = true;
+                o.Events = new OAuthEvents
+                {
+                    OnCreatingTicket = async context =>
+                    {
+                        var request = new HttpRequestMessage(HttpMethod.Get, context.Options.UserInformationEndpoint);
+                        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", context.AccessToken);
+
+                        var response = await context.Backchannel.SendAsync(request, context.HttpContext.RequestAborted);
+                        response.EnsureSuccessStatusCode();
+
+                        using (var user = JsonDocument.Parse(await response.Content.ReadAsStringAsync()))
+                        {
+                            context.RunClaimActions(user.RootElement);
+                        }
+                    },
+                    OnRemoteFailure = HandleOnRemoteFailure
+                };
+            });
         }
 
         public void Configure(IApplicationBuilder app)
@@ -130,7 +171,7 @@ namespace OAuthClientSample
                 notFoundApp.Run(context =>
                 {
                     context.Response.StatusCode = 404;
-                    return Task.FromResult(0);
+                    return Task.CompletedTask;
                 });
             });
 

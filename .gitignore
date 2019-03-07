@@ -29,5 +29,4 @@ project.lock.json
 .testPublish/
 /.vs/
 .vscode/
-global.json
 *.g.targets

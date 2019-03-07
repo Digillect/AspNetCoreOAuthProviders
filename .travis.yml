@@ -1,6 +1,6 @@
 language: csharp
 sudo: false
-dist: trusty
+dist: xenial
 env:
   global:
     - DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
