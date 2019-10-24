@@ -1,25 +1,27 @@
 language: csharp
+mono: none
 sudo: false
 dist: xenial
 env:
   global:
     - DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
     - DOTNET_CLI_TELEMETRY_OPTOUT: 1
-mono: none
+    - NUGET_XMLDOC_MODE: skip
 os:
   - linux
   - osx
-osx_image: xcode8.2
 addons:
   apt:
     packages:
+      - gettext
+      - libcurl4-openssl-dev
+      - libicu-dev
+      - libssl-dev
       - libunwind8
 branches:
   only:
     - master
     - dev
     - /^release\/.*/
-before_install:
-  - if test "$TRAVIS_OS_NAME" == "osx"; then brew update; brew install openssl; ln -s /usr/local/opt/openssl/lib/libcrypto.1.0.0.dylib /usr/local/lib/; ln -s /usr/local/opt/openssl/lib/libssl.1.0.0.dylib /usr/local/lib/; fi
 script:
-  - ./build.sh
+  - ./eng/common/cibuild.sh --configuration Release --prepareMachine

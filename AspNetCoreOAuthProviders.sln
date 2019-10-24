@@ -10,20 +10,23 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.travis.yml = .travis.yml
 		AspNetCoreOAuthProviders.sln.vsspell = AspNetCoreOAuthProviders.sln.vsspell
 		CodeAnalysis.ruleset = CodeAnalysis.ruleset
-		build\dependencies.props = build\dependencies.props
 		Directory.Build.props = Directory.Build.props
 		Directory.Build.targets = Directory.Build.targets
 		en-US_User.dic = en-US_User.dic
 		global.json = global.json
-		korebuild.json = korebuild.json
 		NuGet.config = NuGet.config
 		README.md = README.md
-		build\sources.props = build\sources.props
-		version.props = version.props
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "eng", "eng", "{0372F407-3446-49FA-953C-8E6E2C4392E4}"
+	ProjectSection(SolutionItems) = preProject
+		eng\Signing.props = eng\Signing.props
+		eng\Versions.props = eng\Versions.props
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{9D2C944E-B380-4E62-A5B7-2F58373E61E7}"
 	ProjectSection(SolutionItems) = preProject
+		src\Directory.Build.props = src\Directory.Build.props
 		src\Directory.Build.targets = src\Directory.Build.targets
 	EndProjectSection
 EndProject
@@ -58,6 +61,7 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
+		{0372F407-3446-49FA-953C-8E6E2C4392E4} = {53EFAD28-A7D9-486C-A7B9-D61A8E6CA25E}
 		{69379D2E-11A5-4946-91D9-D9C3CFC4CD22} = {D29963E3-52A7-4859-AB67-80B430CDDFE6}
 		{3909029A-692C-417C-BF15-448926B459EF} = {9D2C944E-B380-4E62-A5B7-2F58373E61E7}
 		{06ABFE8E-B606-419B-83A4-BE8690DBDE43} = {9D2C944E-B380-4E62-A5B7-2F58373E61E7}

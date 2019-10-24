@@ -7,7 +7,7 @@ branches:
     - dev
     - /^release\/.*/
 build_script:
-  - ps: .\run.ps1 default-build
+  - eng\common\CIBuild.cmd -configuration Release -prepareMachine
 clone_depth: 1
 environment:
   global:
@@ -16,5 +16,5 @@ environment:
 test: off
 deploy: off
 artifacts:
-  - path: 'artifacts\build\*.nupkg'
-os: Visual Studio 2019 Preview
+  - path: artifacts\packages\Release\Shipping\*.nupkg
+os: Visual Studio 2019

@@ -1,8 +1,12 @@
 {
   "sdk": {
-    "version": "3.0.100-preview6-012264"
+    "version": "3.0.100"
+  },
+  "tools": {
+    "dotnet": "3.0.100"
   },
   "msbuild-sdks": {
-    "Internal.AspNetCore.Sdk": "3.0.0-build-20190611.1"
+    "Microsoft.DotNet.Arcade.Sdk": "5.0.0-beta.19523.3",
+    "Microsoft.DotNet.Helix.Sdk": "5.0.0-beta.19523.3"
   }
 }

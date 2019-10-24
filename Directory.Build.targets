@@ -1,7 +1,34 @@
 ﻿<Project>
+
+  <Import Project="Sdk.targets" Sdk="Microsoft.DotNet.Arcade.Sdk" />
+
   <PropertyGroup>
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
   </PropertyGroup>
 
-  <Import Project="build\dependencies.props" />
+  <!--
+    Note: Arcade automatically replaces copyrights defined in .props or .csproj files
+    with the default Microsoft copyright. To ensure this doesn't happen, the replaced
+    copyright is restored in this .targets file using the private variable set in .props.
+    Similarly, both delayed and public signing are disabled to override Arcade's defaults.
+  -->
+  <PropertyGroup Label="Workarounds">
+    <Company>$(Authors)</Company>
+    <Copyright>$(CopyrightDigillect)</Copyright>
+    <WarnOnPackingNonPackableProject>false</WarnOnPackingNonPackableProject>
+  </PropertyGroup>
+
+  <Choose>
+    <When Condition="'$(SignAssembly)' == 'false'" />
+    <When Condition="'$(StrongNameKeyId)' == 'Digillect'">
+      <PropertyGroup>
+        <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)eng\Key.snk</AssemblyOriginatorKeyFile>
+        <PublicKey>$(DigillectPublicKey)</PublicKey>
+        <PublicKeyToken>$(DigillectPublicKeyToken)</PublicKeyToken>
+        <DelaySign>false</DelaySign>
+        <PublicSign>false</PublicSign>
+      </PropertyGroup>
+    </When>
+  </Choose>
+
 </Project>

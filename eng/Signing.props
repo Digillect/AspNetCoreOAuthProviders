@@ -1,0 +1,19 @@
+﻿<Project>
+  <PropertyGroup>
+    <!-- Control whether an empty ItemsToSign item group is allowed when calling SignToolTask. -->
+    <AllowEmptySignList>true</AllowEmptySignList>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Reset Arcade's defaults. -->
+    <ItemsToSign Remove="@(ItemsToSign)" />
+    <StrongNameSignInfo Remove="@(StrongNameSignInfo)" />
+    <FileExtensionSignInfo Remove="@(FileExtensionSignInfo)" />
+
+    <!--
+    <StrongNameSignInfo Include="None" PublicKeyToken="46fb24501f5dffcf" CertificateName="Digillect" />
+    <FileExtensionSignInfo Include=".dll;.exe" CertificateName="Digillect" />
+    <FileExtensionSignInfo Include=".nupkg" CertificateName="Digillect" />
+    -->
+  </ItemGroup>
+</Project>

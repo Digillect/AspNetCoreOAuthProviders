@@ -1,28 +1,35 @@
 ﻿<Project>
+
+  <PropertyGroup Condition="'$(ContinuousIntegrationBuild)' == 'true' And '$(OfficialBuildId)' == ''">
+    <_BuildNumberR>$([System.Math]::Floor($([MSBuild]::Divide($([System.DateTime]::Now.TimeOfDay.TotalMinutes), 15))))</_BuildNumberR>
+    <!--<_BuildNumberR>$([MSBuild]::Add($(_AppVeyorBuildRevision), 1))</_BuildNumberR>-->
+    <OfficialBuildId>$([System.DateTime]::Now.ToString(yyyyMMdd)).$(_BuildNumberR)</OfficialBuildId>
+  </PropertyGroup>
+
+  <Import Project="Sdk.props" Sdk="Microsoft.DotNet.Arcade.Sdk" />
+
   <PropertyGroup>
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
   </PropertyGroup>
 
-  <Import Project="version.props" />
-
   <PropertyGroup>
     <DefaultItemExcludes>$(DefaultItemExcludes);**\.git*;**\*~</DefaultItemExcludes>
-    <LangVersion>latest</LangVersion>
     <CodeAnalysisRuleset>$(MSBuildThisFileDirectory)CodeAnalysis.ruleset</CodeAnalysisRuleset>
   </PropertyGroup>
 
   <PropertyGroup>
     <Product>ASP.NET Core OAuth 2.0 authentication providers.</Product>
+    <!-- Used in .targets file to override default Microsoft copyright -->
+    <CopyrightDigillect />
     <RepositoryUrl>https://github.com/Digillect/AspNetCoreOAuthProviders</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)build\Key.snk</AssemblyOriginatorKeyFile>
-    <SignAssembly>true</SignAssembly>
-    <PublicSign Condition="'$(OS)' != 'Windows_NT'">true</PublicSign>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/Digillect/AspNetCoreOAuthProviders</PackageProjectUrl>
     <PackageIconUrl></PackageIconUrl>
+    <StrongNameKeyId>Digillect</StrongNameKeyId>
+    <DigillectPublicKey>00240000048000009400000006020000002400005253413100040000010001004d61547f89bc68150603ec79faa026249711a0302e3784479f8fa560e0f6144b6b7883242c3546804d69c51677bb3a25a2ab58281415593a092388868f53b84ca4e591ec095cbcc660096d4506f9fdcf8ec19d94e7b72aa838e791c08f4f4d56e16d8e97b402351ff092a795aab82e9a1455b9df29fe5daad6caad6603e347b8</DigillectPublicKey>
+    <DigillectPublicKeyToken>46fb24501f5dffcf</DigillectPublicKeyToken>
   </PropertyGroup>
 
-  <Import Project="build\sources.props" />
 </Project>
